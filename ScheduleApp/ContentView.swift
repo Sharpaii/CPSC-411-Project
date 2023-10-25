@@ -8,24 +8,27 @@
 import SwiftUI
 
 struct ContentView: View {
-    //@StateObject var manager = VolunteerManager()
-    
+    @StateObject var manager = ScheduleManager()
     var body: some View {
-        NavigationView {
-            VStack {
-                Text("List of volunteers: ")
-                    .font(.headline)
-                    .padding(.bottom, 30)
-                //Text(manager.volunteerList)
-                    .padding(.bottom, 30)
-                //NavigationLink(destination: VolunteerForm()) {
-                //    Text("Add more volunteers")
-                //        .bold()
-                //        .modifier(ButtonDesign())
-            }
-                Spacer()
+        TabView {
+            AvailableTimes()
+                .tabItem {
+                    Image(systemName: "calendar")
+                    Text("Available Times")
+                }
+            EditableSchedulesList()
+                .tabItem {
+                    Image(systemName: "clock")
+                    Text("Schedules List")
+                }
+            AddDateTime()
+                .tabItem {
+                    Image(systemName: "plus")
+                    Text("Add Time")
+                }
         }
-    }//.environmentObject(manager)
+        .environmentObject(manager)
+    }
 }
 
 
