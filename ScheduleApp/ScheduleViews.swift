@@ -1,92 +1,141 @@
-//
+//  ===========================================================================
 //  ScheduleViews.swift
 //  ScheduleApp
-//
-//  Created by Madeline Sharpe on 10/24/23.
-//
+//  ===========================================================================
+//  Created by: Swifter Sweeper Jets (SSJ)
+//  Group Members: Ethan Stupin, Madeleine Sharpe, Neema Tabarani, Rey Urquiza
+//  ===========================================================================
 
 import SwiftUI
 
-struct AvailableTimes: View{
+// This is the page that shows the point of the project, which is the combined
+// available time that everyone has inputted
+struct AvailableTimes: View {
     @EnvironmentObject var manager: ScheduleManager
+    
+    @State private var earliestTime: String = ""
+    @State private var latestTime: String = ""
+    
     var body: some View {
-        VStack{
-            Text("There are currently no available times that match.")
+        ZStack {
+            // Shows a background image instead of color
+            Image("background")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .opacity(0.75)
+
+            VStack {
+                Text("Everyone is free between: ")
+                    .padding()
+                    .background(Color.white.opacity(0.5))
+                    .cornerRadius(10)
+                    .font(.largeTitle)
+                Text("\(earliestTime) - \(latestTime)")
+                    .padding()
+                    .background(Color.blue.opacity(0.5))
+                    .cornerRadius(10)
+                    .font(.largeTitle)
+            }
+            .padding()
+        }
+        .onAppear {
+            if let freeTime = manager.calculateFreeTime() {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "MM/dd/yyyy [HH:mm - HH:mm]"
+                earliestTime = formatter.string(from: freeTime.0)
+                latestTime = formatter.string(from: freeTime.1)
+            } else {
+                earliestTime = "No times match"
+                latestTime = "Try other days or times"
+            }
         }
     }
 }
 
+// This page shows a list of names and times that have been entered
 struct EditableSchedulesList: View {
     @EnvironmentObject var manager: ScheduleManager
-    var body: some View {
-        VStack {
-            // TODO: Model 3 - Add the EditButton here
-            EditButton()
-            List {
-                /// ForEach requires each element in the collection it traverses to be Identifiable
-                ForEach(manager.schedules) {
-                                    schedule in
-                                    VStack (alignment: .leading) {
-                                        Text(schedule.person)
-                                            .font(.largeTitle)
-                                        Text(schedule.dT)
-                                            .font(.caption)
-                                    }
-                // TODO: Model 2 - Add the onDelete method below
-                                }.onDelete {
-                                    offset in
-                                    manager.schedules.remove(atOffsets: offset)
-                                }
-                // TODO: Model 3 - Add the onMove method below
-                                .onMove {
-                                    offset, index in
-                                    manager.schedules.move(fromOffsets: offset, toOffset: index)
-                                }
+    @State private var isEditing = false
 
+    var body: some View {
+        ZStack {
+            // Set the background color here
+            Color.gray.edgesIgnoringSafeArea(.all)
+
+            VStack {
+                Button(action: {
+                    self.isEditing.toggle()
+                }) {
+                    Text(self.isEditing ? "Done" : "Edit")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.orange)
+                        .cornerRadius(10)
+                }
+                List {
+                    Text("Time List")
+                        .font(.largeTitle)
+                        .padding()
+                        .cornerRadius(10)
+                    ForEach(manager.schedules.indices, id: \.self) { index in
+                        VStack(alignment: .leading) {
+                            Text(manager.schedules[index].person)
+                                .font(.largeTitle)
+                            Text(formatDate(date: manager.schedules[index].startTime))
+                                .font(.caption)
+                            Text(formatDate(date: manager.schedules[index].endTime))
+                                .font(.caption)
+                        }
+                        // Alternating background colors for list rows
+                        .listRowBackground(index.isMultiple(of: 2) ? Color.gray.opacity(0.05) : Color.black.opacity(0.05))
+                    }
+                    .onDelete(perform: isEditing ? removeRows : nil)
+                    .onMove(perform: isEditing ? moveRows : nil)
+                }
             }
         }
     }
+
+    func formatDate(date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yyyy [HH:mm]"
+        return formatter.string(from: date)
+    }
+
+    func removeRows(at offsets: IndexSet) {
+        manager.schedules.remove(atOffsets: offsets)
+    }
+
+    func moveRows(from source: IndexSet, to destination: Int) {
+        manager.schedules.move(fromOffsets: source, toOffset: destination)
+    }
 }
 
+// This is the page for adding times to the timesheet
 struct AddDateTime: View {
-    //@SceneStorage("person") var person: String = ""
-    //@SceneStorage("dT") var dT: String = ""
     @EnvironmentObject var manager: ScheduleManager
-    @State var startTime = Date()
-    @State var endTime = Date()
-    var closedRange = Calendar.current.date(byAdding: .year, value: -1, to: Date())!
-    
-    func formatDate() -> String {
-        let sComponents = Calendar.current.dateComponents([.hour, .minute, .day, .year, .month], from: startTime)
-        let sHour = sComponents.hour ?? 0
-        let sMinute = sComponents.minute ?? 0
-        let sDay = sComponents.day ?? 0
-        let sMonth = sComponents.month ?? 0
-        let sYear = sComponents.year ?? 0
-        
-        let eComponents = Calendar.current.dateComponents([.hour, .minute], from: endTime)
-        let eHour = eComponents.hour ?? 0
-        let eMinute = eComponents.minute ?? 0
-        
-        if (eHour < sHour){
-            return "Invalid time"
-        }
-        else {
-            return "\(sMonth)/\(sDay)/\(sYear) [\(sHour):\(sMinute) - \(eHour):\(eMinute)]"
-        }
-    }
-    
+    @State private var name: String = ""
+    @State private var startTime = Date()
+    @State private var endTime = Date()
+
+    // Visual portion for the add times page
     var body: some View {
         Form {
-            Section(header:Text("Start Time")) {
+            Text("Add Your Free Time").font(.largeTitle).padding()
+            Section(header: Text("Name")) {
+                TextField("Enter your name", text: $name)
+            }
+            Section(header: Text("Start Time")) {
                 DatePicker("Pick a date: ", selection: $startTime)
             }
-            Section(header:Text("End Time")) {
+            Section(header: Text("End Time")) {
                 DatePicker("Pick a time: ", selection: $endTime, displayedComponents: .hourAndMinute)
             }
-            Section(header: Text("Result")) {
-                Text(formatDate())
+            Button("Save") {
+                manager.addSchedule(person: name, startTime: startTime, endTime: endTime)
             }
         }
     }
 }
+
+//  ===== END OF FILE =========================================================
