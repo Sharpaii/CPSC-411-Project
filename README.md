@@ -1,5 +1,7 @@
 # Free Time Calculator
+
 Group Name: Swifter Sweeper Jets (SSJ)
+
 Group Members: Ethan Stupin, Madeleine Sharpe, Neema Tabarani, Rey Urquiza
 
 ## Overview
