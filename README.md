@@ -13,13 +13,12 @@ The Free Time Calculator is a Swift application designed to help groups of peopl
 
 ## Installation
 To run the Free Time Calculator, clone the repository to your local machine and open the project in Xcode.
-In XCode, run the program to have the simulator install and run the app. 
-
-```bash
-git clone https://github.com/yourusername/freetimecalculator.git
-cd freetimecalculator
-open FreeTimeCalculator.xcodeproj
-```
+- Copy the link from the github repo
+- Open XCode and select 'clone from github repository'
+- Paste link into entry form
+In XCode, run the program to have the simulator install and run the app.
+- Click the run arrow at the top left or click Product > Run
+- Simulator will open in a new window to install and open the app
 
 ## Usage
 1. Launch the app and navigate to the 'Add Times' page.
