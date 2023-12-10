@@ -7,6 +7,7 @@
 //  ===========================================================================
 
 import Foundation
+import SwiftUI
 
 // Struct to handle incoming data from time entry page
 struct Schedule: Identifiable {
@@ -22,8 +23,34 @@ class ScheduleManager: ObservableObject {
 
     // Format time inputs and add to struct
     func addSchedule(person: String, startTime: Date, endTime: Date) {
-        let newSchedule = Schedule(person: person, startTime: startTime, endTime: endTime)
-        schedules.append(newSchedule)
+        if endTime < startTime {
+            // Create an alert when end time is before start time
+            let alert = UIAlertController(title: "Invalid Entry", message: "End time cannot be before start time.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Try Again", style: .default, handler: nil))
+            
+            // Present the alert
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootViewController = windowScene.windows.first?.rootViewController {
+                    rootViewController.present(alert, animated: true, completion: nil)
+                }
+            }
+        } else {
+            let newSchedule = Schedule(person: person, startTime: startTime, endTime: endTime)
+            schedules.append(newSchedule)
+
+            // Create an alert when data has been entered successfully
+            let alert = UIAlertController(title: "Your Time Has Been Added", message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Done", style: .default, handler: nil))
+            
+            // Present the alert
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootViewController = windowScene.windows.first?.rootViewController {
+                    rootViewController.present(alert, animated: true, completion: nil)
+                }
+            }
+        }
     }
 
     // Calculate the latest start date and earliest end date

@@ -13,8 +13,9 @@ import SwiftUI
 struct AvailableTimes: View {
     @EnvironmentObject var manager: ScheduleManager
     
-    @State private var earliestTime: String = ""
-    @State private var latestTime: String = ""
+    @State private var date: String = ""
+    @State private var timeInterval: String = ""
+    @State private var people: [String] = []
     
     var body: some View {
         ZStack {
@@ -25,32 +26,122 @@ struct AvailableTimes: View {
                 .opacity(0.75)
 
             VStack {
-                Text("Everyone is free between: ")
-                    .padding()
-                    .background(Color.white.opacity(0.5))
-                    .cornerRadius(10)
-                    .font(.largeTitle)
-                Text("\(earliestTime) - \(latestTime)")
-                    .padding()
-                    .background(Color.blue.opacity(0.5))
-                    .cornerRadius(10)
-                    .font(.largeTitle)
+                VStack {
+                    Text("Everyone can meet up during: ")
+                        .font(.largeTitle)
+                        .padding()
+                    Text(date)
+                        .font(.largeTitle)
+                        .padding()
+                    Text(timeInterval)
+                        .font(.largeTitle)
+                        .padding()
+                }
+                .padding()
+                .background(Color.blue.opacity(0.5))
+                .cornerRadius(10)
+
+                VStack {
+                    Text("Friends Participating: ")
+                        .font(.largeTitle)
+                    ForEach(people, id: \.self) { person in
+                        Text("- \(person)")
+                            .font(.largeTitle)
+                    }
+                }
+                .padding()
+                .background(Color.green.opacity(0.5))
+                .cornerRadius(10)
             }
             .padding()
         }
         .onAppear {
             if let freeTime = manager.calculateFreeTime() {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "MM/dd/yyyy [HH:mm - HH:mm]"
-                earliestTime = formatter.string(from: freeTime.0)
-                latestTime = formatter.string(from: freeTime.1)
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "MM/dd/yyyy"
+                date = dateFormatter.string(from: freeTime.0)
+                
+                let timeFormatter = DateFormatter()
+                timeFormatter.dateFormat = "h:mm a"
+                let startTime = timeFormatter.string(from: freeTime.0)
+                let endTime = timeFormatter.string(from: freeTime.1)
+                timeInterval = "\(startTime) - \(endTime)"
+                
+                people = manager.schedules.map { $0.person }
             } else {
-                earliestTime = "No times match"
-                latestTime = "Try other days or times"
+                date = "No times match"
+                timeInterval = "Try other days or times"
             }
         }
     }
 }
+
+//struct AvailableTimes: View {
+//    @EnvironmentObject var manager: ScheduleManager
+//
+//    @State private var date: String = ""
+//    @State private var timeInterval: String = ""
+//    @State private var people: [String] = []
+//
+//    var body: some View {
+//        ZStack {
+//            // Shows a background image instead of color
+//            Image("background")
+//                .resizable()
+//                .edgesIgnoringSafeArea(.all)
+//                .opacity(0.75)
+//
+//            VStack {
+//                Text("Everyone can meet up during: ")
+//                    .padding()
+//                    .background(Color.white.opacity(0.5))
+//                    .cornerRadius(10)
+//                    .font(.largeTitle)
+//                Text(date)
+//                    .padding()
+//                    .background(Color.blue.opacity(0.5))
+//                    .cornerRadius(10)
+//                    .font(.largeTitle)
+//                Text(timeInterval)
+//                    .padding()
+//                    .background(Color.blue.opacity(0.5))
+//                    .cornerRadius(10)
+//                    .font(.largeTitle)
+//                Text("Friends Participating: ")
+//                    .padding()
+//                    .background(Color.green.opacity(0.5))
+//                    .cornerRadius(10)
+//                    .font(.largeTitle)
+//                ForEach(people, id: \.self) { person in
+//                    Text("- \(person)")
+//                        .padding()
+//                        .background(Color.green.opacity(0.5))
+//                        .cornerRadius(10)
+//                        .font(.largeTitle)
+//                }
+//            }
+//            .padding()
+//        }
+//        .onAppear {
+//            if let freeTime = manager.calculateFreeTime() {
+//                let dateFormatter = DateFormatter()
+//                dateFormatter.dateFormat = "MM/dd/yyyy"
+//                date = dateFormatter.string(from: freeTime.0)
+//
+//                let timeFormatter = DateFormatter()
+//                timeFormatter.dateFormat = "HH:mm"
+//                let startTime = timeFormatter.string(from: freeTime.0)
+//                let endTime = timeFormatter.string(from: freeTime.1)
+//                timeInterval = "\(startTime) - \(endTime)"
+//
+//                people = manager.schedules.map { $0.person }
+//            } else {
+//                date = "No times match"
+//                timeInterval = "Try other days or times"
+//            }
+//        }
+//    }
+//}
 
 // This page shows a list of names and times that have been entered
 struct EditableSchedulesList: View {
