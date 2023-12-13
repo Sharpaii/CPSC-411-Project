@@ -2,7 +2,7 @@
 
 Group Name: Swifter Sweeper Jets (SSJ)
 
-Group Members: Ethan Stupin, Madeleine Sharpe, Neema Tabarani, Rey Urquiza
+Group Members: Ethan Stupin, Madeline Sharpe, Neema Tabarani, Rey Urquiza
 
 ## Overview
 The Free Time Calculator is a Swift application designed to help groups of people find common free time slots. Users can input their available start and end times, and the app calculates the overlapping free time that suits everyone.
